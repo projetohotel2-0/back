@@ -36,3 +36,4 @@ Route::get('lanchesDestroy', [LancheController::class, "consultDestroy"]);
 // Route::get('lancheRestaure', [LancheController::class, "consultRestore"]);
 Route::patch('lancheRestore/{id}', [LancheController::class, 'consultRestore']);
 //======================Rotas Serviços===================
+//======================Rotas passeios===================

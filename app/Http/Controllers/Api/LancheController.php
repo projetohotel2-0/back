@@ -21,24 +21,116 @@ class LancheController extends Controller
      */
     public function store(Request $request)
     {
-                       //Validação dos dados pra saber se esta tudo de acordo com o que se espera deles
+     
+
+
+    // Validação dos dados recebidos
+    $request->validate([
+        // 'name' => 'required|string',
+        // 'description' => 'nullable|string',
+        // //'type' => 'nullable|array', // Se for JSON, será convertido para array automaticamente
+        // 'promotion' => 'nullable|boolean',
+        // 'discount' => 'nullable|numeric',
+        'images' => 'required|string', // Recebe a string Base64 da imagem
+    ]);
+
+    // Salvar os dados principais no banco de dados
+    $dadosLanche = new Lanche();
+    $dadosLanche->name = $request->name;
+    $dadosLanche->description = $request->description;
+    $dadosLanche->type = json_encode($request->type); // Convertendo para JSON
+    $dadosLanche->promotion = $request->promotion;
+    $dadosLanche->discount = $request->discount;
+    
+
+    // Processar a imagem codificada em Base64
+    $base64Image = $request->images;
+
+    // // Validar o formato Base64
+    // if (preg_match('/^data:image\/(\w+);base64,/', $base64Image, $matches)) {
+    //     $imageType = $matches[1]; // Obtém o tipo da imagem (png, jpeg, etc.)
+    //     $base64Image = substr($base64Image, strpos($base64Image, ',') + 1); // Remove cabeçalho Base64
+    //     $decodedImage = base64_decode($base64Image); // Decodifica a imagem
+
+    //     // Gerar nome único para o arquivo
+    //     $fileName = uniqid() . '.' . $imageType;
+    //     $filePath = "images/$fileName";
+
+    //     // Salvar a imagem no sistema de arquivos
+    //     file_put_contents(public_path($filePath), $decodedImage);
+
+    //     // Criar os dados da imagem para salvar no JSON
+    //     $imageData = [
+    //         'filename' => $fileName,
+    //         'path' => $filePath,
+    //         'url' => asset($filePath), // URL acessível da imagem
+    //     ];
+
+    //     // Adicionar as informações da imagem ao modelo
+    //     $dadosLanche->images = json_encode($imageData);
+    // } else {
+    //     return response()->json(['message' => 'Formato de imagem inválido'], 400);
+    // }
+
+
+
+    if (preg_match('/^data:image\/(\w+);base64,/', $base64Image, $matches)) {
+        $imageType = $matches[1];
+        $base64ImageWithoutHeader = substr($base64Image, strpos($base64Image, ',') + 1);
+        $decodedImage = base64_decode($base64ImageWithoutHeader);
+    
+        if ($decodedImage === false) {
+            return response()->json(['message' => 'Falha ao decodificar a imagem.'], 400);
+        }
+    
+        $fileName = uniqid() . '.' . $imageType;
+        $filePath = "images/$fileName";
+    
+        // Salvar a imagem no disco
+        file_put_contents(public_path($filePath), $decodedImage);
+    
+        // Criar os dados da imagem, incluindo o Base64 completo
+        $imageData = [
+           
+            $base64Image, // Inclui o Base64 completo no JSON
             
-                    //salvando dados no banco de dados
-                    $dadosLanche = new Lanche;
-            
-                    $dadosLanche->name = $request->name;
-                    $dadosLanche->description = $request->description;
-                    $dadosLanche->type = json_encode((array) $request->type);
-                    // $dadosLanche->type = $request->type;
-                    $dadosLanche->promotion = $request->promotion;
-                    $dadosLanche->discount = $request->discount;
-                    $dadosLanche->save();
-                  
-                    //Backlog -- rotorno de resposta para o usuário
-                    return response()->json([
-                        'mensagem' => 'dados salvos com sucesso!',
-                        'dados' => $dadosLanche,
-                    ], 201); //cria o status 201
+        ];
+    
+        $dadosLanche->images = json_encode($imageData);
+        
+    } else {
+        return response()->json(['message' => 'Formato inválido de imagem Base64.'], 400);
+    }
+
+
+
+
+
+    // Salvar os dados no banco de dados
+    $dadosLanche->save();
+
+    // Retornar resposta de sucesso
+    return response()->json([
+        'mensagem' => 'Dados salvos com sucesso!',
+        'dados' => [
+            'id' => $dadosLanche->id,
+            'name' => $dadosLanche->name,
+            'description' => $dadosLanche->description,
+            'type' => $dadosLanche->type, // Decodifica JSON armazenado
+            'promotion' => $dadosLanche->promotion,
+            'discount' => $dadosLanche->discount,
+        //    'images' => [
+        //     'base64' => json_decode($dadosLanche->images)->base64, // Retorna apenas o Base64
+        // ],
+        //'images' => json_decode($dadosLanche->images),
+        
+        'images' => json_decode($dadosLanche->images)->base64,
+       
+        // 'images' => json_decode($dadosLanche->images, true)['base64'],
+        ],
+    ], 201);
+
+                    
     }
 
     /**

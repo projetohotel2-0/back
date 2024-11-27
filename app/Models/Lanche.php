@@ -11,4 +11,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Lanche extends Model
 {
     use HasFactory, Notifiable, SoftDeletes;
+
+    // protected $casts = [
+    //     'images' => 'json', // Ou 'json'
+    //     'type' => 'json',
+    // ];
 }
+

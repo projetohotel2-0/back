@@ -92,7 +92,7 @@ class LancheController extends Controller
         // Criar os dados da imagem, incluindo o Base64 completo
         $imageData = [
            
-            $base64Image, // Inclui o Base64 completo no JSON
+           'base64'=> $base64Image, // Inclui o Base64 completo no JSON
             
         ];
     

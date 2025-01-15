@@ -27,7 +27,7 @@ Route::get('lanches', [LancheController::class, "index"]);
 Route::post('lanches', [LancheController::class, "store"]);
 
 //Rota para excluir um lanche (pode ser recuperado posteriormente)
-Route::delete('/lanches/{id}', [LancheController::class, "destroy"]);
+Route::delete('lanches/{id}', [LancheController::class, "destroy"]);
 
 //Rota para consultar um lanche excluido
 Route::get('lanchesDestroy', [LancheController::class, "consultDestroy"]);
